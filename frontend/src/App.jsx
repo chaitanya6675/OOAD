@@ -35,22 +35,37 @@ import { AdminRefundsPage } from './pages/admin/AdminRefundsPage';
 import { AdminReportsPage } from './pages/admin/AdminReportsPage';
 import { AdminDataExportPage } from './pages/admin/AdminDataExportPage';
 
+const BASE = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
+
+const getNormalizedPath = () => {
+  let p = window.location.pathname;
+  if (BASE && p.startsWith(BASE)) {
+    p = p.slice(BASE.length);
+  }
+  if (!p.startsWith('/')) {
+    p = '/' + p;
+  }
+  return p + window.location.search;
+};
+
 function Router() {
-  const [currentPath, setCurrentPath] = useState(window.location.pathname + window.location.search);
+  const [currentPath, setCurrentPath] = useState(getNormalizedPath());
   const { user, isAuthenticated, isAdmin, loading } = useAuth();
 
   // Listen to browser back/forward buttons
   useEffect(() => {
     const handlePopState = () => {
-      setCurrentPath(window.location.pathname + window.location.search);
+      setCurrentPath(getNormalizedPath());
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
   const navigate = (to) => {
-    window.history.pushState({}, '', to);
-    setCurrentPath(to);
+    const target = to.startsWith('/') ? to : '/' + to;
+    const fullUrl = (BASE || '') + target;
+    window.history.pushState({}, '', fullUrl);
+    setCurrentPath(target);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 

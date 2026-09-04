@@ -220,19 +220,23 @@ node tests/e2eTest.js
 
 ---
 
-## 🌐 Online Deployment Guide
+## 🌐 GitHub Pages Live Deployment
 
-### Deploying to Render / Railway (Full-Stack Unified)
-1. Push this repository to GitHub.
-2. In Render / Railway, select **"Web Service"** and connect your GitHub repository.
-3. Set the build and start commands:
-   - **Build Command**: `cd frontend && npm install && npm run build && cd ../backend && npm install`
-   - **Start Command**: `cd backend && node server.js`
-4. Add Environment Variables:
-   - `NODE_ENV`: `production`
-   - `PORT`: `5000` (or leave default assigned by platform)
-   - `JWT_SECRET`: *(A secure random 32-character string)*
-5. Deploy service. Once deployed, the provided public URL will serve both the frontend storefront and backend APIs globally!
+### Live Website URL
+**[https://chaitanya6675.github.io/OOAD/](https://chaitanya6675.github.io/OOAD/)**
+
+### Automated Deployment via GitHub Actions
+The application is automatically built and deployed to GitHub Pages on every push to the `main` branch via `.github/workflows/deploy.yml`:
+1. Checks out the repository.
+2. Sets up Node.js v20.
+3. Installs frontend dependencies (`cd frontend && npm install`).
+4. Compiles the production bundle with Vite (`base: '/OOAD/'`).
+5. Generates the SPA fallback handler (`404.html`) to support direct linking to any subroute without server 404s.
+6. Publishes to GitHub Pages via official `actions/deploy-pages@v4`.
+
+### Full-Stack Architecture & Hosting Notes
+- **Frontend**: Hosted globally on GitHub Pages CDN (`https://chaitanya6675.github.io/OOAD/`).
+- **Backend & Database**: The repository contains the complete Node.js/Express REST API and SQLite relational database (`backend/database/ecommerce.db`). For persistent database operations and active API transactions, the backend can be hosted on any Node-compatible server and connected via `VITE_API_URL`.
 
 ---
 
