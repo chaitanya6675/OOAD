@@ -61,16 +61,20 @@ export const AdminDataExportPage = () => {
   const handleExportAllExcel = async () => {
     try {
       setDownloadingAll(true);
-      window.location.href = '/api/export/excel/all';
-      setTimeout(() => setDownloadingAll(false), 2000);
+      ApiClient.downloadMasterExcel();
+      setTimeout(() => setDownloadingAll(false), 1200);
     } catch (err) {
-      alert('Error downloading Excel file');
+      alert('Error exporting Excel file: ' + err.message);
       setDownloadingAll(false);
     }
   };
 
   const handleExportTableCsv = (tableKey) => {
-    window.location.href = `/api/export/csv/${tableKey}`;
+    try {
+      ApiClient.downloadTableCsv(tableKey);
+    } catch (err) {
+      alert('Error exporting CSV: ' + err.message);
+    }
   };
 
   // Get dynamic table headers

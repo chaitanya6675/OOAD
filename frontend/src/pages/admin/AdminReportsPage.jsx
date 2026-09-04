@@ -70,11 +70,19 @@ export const AdminReportsPage = () => {
   };
 
   const handleExportCsv = () => {
-    window.open('/api/export/csv/sales', '_blank');
+    try {
+      ApiClient.downloadTableCsv('sales');
+    } catch (err) {
+      alert('Error exporting CSV: ' + err.message);
+    }
   };
 
   const handleExportExcel = () => {
-    window.open('/api/export/excel/all', '_blank');
+    try {
+      ApiClient.downloadMasterExcel();
+    } catch (err) {
+      alert('Error exporting Excel: ' + err.message);
+    }
   };
 
   const { summary } = reportData;

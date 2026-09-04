@@ -33,7 +33,7 @@ export const LoginPage = ({ onNavigate }) => {
   const handleFillDemo = (type = 'customer') => {
     if (type === 'customer') {
       setEmail('customer@smartecom.com');
-      setPassword('Customer@12345');
+      setPassword('Customer@123');
     } else {
       setEmail('admin@smartecom.com');
       setPassword('Admin@12345');
