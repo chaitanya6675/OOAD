@@ -1,0 +1,23 @@
+{
+  "name": "smart-ecommerce-platform",
+  "version": "1.0.0",
+  "description": "Smart E-Commerce: Object-Oriented E-Commerce Sales and Order Management Platform - Capstone Project",
+  "scripts": {
+    "install:all": "cd backend && npm install && cd ../frontend && npm install",
+    "build": "cd frontend && npm install && npm run build && cd ../backend && npm install",
+    "build:frontend": "cd frontend && npm run build",
+    "start": "cd backend && node server.js",
+    "seed": "cd backend && node seeds/seedData.js",
+    "test:e2e": "cd backend && node tests/e2eTest.js",
+    "dev:frontend": "cd frontend && npm run dev"
+  },
+  "keywords": [
+    "ooad",
+    "ecommerce",
+    "capstone",
+    "sales-management",
+    "order-management"
+  ],
+  "author": "Capstone Team",
+  "license": "ISC"
+}
