@@ -8,7 +8,7 @@ import {
   INITIAL_RETURNS,
   INITIAL_REFUNDS,
   INITIAL_INVENTORY_LOGS
-} from './mockData';
+} from './mockData.js';
 
 // Helper to get from localStorage or fallback
 const getStorage = (key, fallback) => {
@@ -198,7 +198,7 @@ export class DbStore {
     }));
 
     // Filter: Category
-    if (params.category) {
+    if (params.category && params.category !== '') {
       products = products.filter(p => p.categoryId === Number(params.category));
     }
 
@@ -222,7 +222,7 @@ export class DbStore {
     }
 
     // Filter: In Stock Only
-    if (params.inStock === true || params.inStock === 'true') {
+    if (params.inStock === true || params.inStock === 'true' || params.inStockOnly === true || params.inStockOnly === 'true') {
       products = products.filter(p => p.stockQuantity > 0 && p.isAvailable);
     }
 
@@ -247,6 +247,10 @@ export class DbStore {
 
     return {
       products: paginated,
+      total,
+      totalPages,
+      page,
+      limit,
       pagination: {
         total,
         page,

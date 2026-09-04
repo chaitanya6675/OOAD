@@ -4,7 +4,7 @@
  * Completely eliminates backend dependency on GitHub Pages with 0 network errors.
  */
 
-import { DbStore } from './dbStore';
+import { DbStore } from './dbStore.js';
 
 // Ensure storage is initialized on load
 DbStore.init();
