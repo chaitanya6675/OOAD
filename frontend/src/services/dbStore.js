@@ -344,22 +344,61 @@ export class DbStore {
   // --- SHOPPING CART ---
   static getCart() {
     this.init();
-    return getStorage('smart_ecom_cart', { items: [], itemCount: 0, subtotal: 0, shippingFee: 0, totalAmount: 0 });
+    const cart = getStorage('smart_ecom_cart', { items: [], itemCount: 0, subtotal: 0, shippingFee: 0, totalAmount: 0 });
+    const products = this.getProductsRaw();
+    const prodMap = Object.fromEntries(products.map(p => [p.id, p]));
+    let modified = false;
+
+    if (cart.items && Array.isArray(cart.items) && cart.items.length > 0) {
+      cart.items = cart.items.map(item => {
+        const prod = prodMap[item.productId];
+        const stockQuantity = prod ? prod.stockQuantity : (typeof item.stockQuantity === 'number' ? item.stockQuantity : 99);
+        const isAvailable = prod ? (prod.isAvailable !== 0 && prod.isAvailable !== false ? 1 : 0) : (item.isAvailable === 0 || item.isAvailable === false ? 0 : 1);
+        const productName = prod ? prod.name : (item.productName || item.name || 'Product');
+
+        if (item.isAvailable !== isAvailable || item.stockQuantity !== stockQuantity || item.productName !== productName) {
+          modified = true;
+        }
+
+        return {
+          ...item,
+          name: productName,
+          productName,
+          stockQuantity,
+          isAvailable
+        };
+      });
+
+      if (modified) {
+        setStorage('smart_ecom_cart', cart);
+      }
+    }
+    return cart;
   }
 
   static recalculateCart(cart) {
     const products = this.getProductsRaw();
     const prodMap = Object.fromEntries(products.map(p => [p.id, p]));
 
-    // Validate quantities against stock
-    cart.items = cart.items.map(item => {
+    // Validate and update item attributes against catalog
+    cart.items = (cart.items || []).map(item => {
       const prod = prodMap[item.productId];
-      const maxStock = prod ? prod.stockQuantity : item.stockQuantity;
-      const validQty = Math.min(Math.max(1, item.quantity), maxStock > 0 ? maxStock : 1);
+      const maxStock = prod ? prod.stockQuantity : (typeof item.stockQuantity === 'number' ? item.stockQuantity : 99);
+      const isAvailable = prod ? (prod.isAvailable !== 0 && prod.isAvailable !== false ? 1 : 0) : (item.isAvailable === 0 || item.isAvailable === false ? 0 : 1);
+      const productName = prod ? prod.name : (item.productName || item.name || 'Product');
+      const validQty = Math.max(1, Number(item.quantity) || 1);
+      const unitPrice = prod ? prod.price : item.price;
+
       return {
         ...item,
+        name: productName,
+        productName,
+        price: unitPrice,
+        imageUrl: prod ? prod.imageUrl : item.imageUrl,
+        stockQuantity: maxStock,
+        isAvailable,
         quantity: validQty,
-        subtotal: Number((item.price * validQty).toFixed(2))
+        subtotal: Number((unitPrice * validQty).toFixed(2))
       };
     });
 
@@ -395,9 +434,11 @@ export class DbStore {
         id: Date.now(),
         productId: product.id,
         name: product.name,
+        productName: product.name,
         price: product.price,
         imageUrl: product.imageUrl,
         stockQuantity: product.stockQuantity,
+        isAvailable: product.isAvailable !== 0 && product.isAvailable !== false ? 1 : 0,
         quantity: quantity,
         subtotal: Number((product.price * quantity).toFixed(2))
       });

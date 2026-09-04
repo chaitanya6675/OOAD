@@ -23,9 +23,18 @@ export const CartPage = ({ onNavigate }) => {
     );
   }
 
-  const hasInsufficientStock = cart.items.some(
-    item => !item.isAvailable || item.stockQuantity < item.quantity
-  );
+  // Safe stock validation: cart quantity must not exceed available warehouse stock
+  const isItemStockExceeded = (item) => {
+    if (!item) return false;
+    // If explicitly marked inactive or unavailable (0 or false)
+    if (item.isAvailable === 0 || item.isAvailable === false) return true;
+    const stock = typeof item.stockQuantity === 'number' ? item.stockQuantity : 999;
+    if (stock <= 0) return true;
+    const qty = Number(item.quantity) || 1;
+    return qty > stock;
+  };
+
+  const hasInsufficientStock = cart.items.some(isItemStockExceeded);
 
   const handleQtyChange = async (productId, newQty) => {
     try {
@@ -95,7 +104,8 @@ export const CartPage = ({ onNavigate }) => {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
             {cart.items.map(item => {
-              const isExceeded = !item.isAvailable || item.stockQuantity < item.quantity;
+              const isExceeded = isItemStockExceeded(item);
+              const maxStock = typeof item.stockQuantity === 'number' ? item.stockQuantity : 999;
 
               return (
                 <div 
@@ -111,7 +121,7 @@ export const CartPage = ({ onNavigate }) => {
                   {/* Thumbnail */}
                   <img
                     src={item.imageUrl || 'https://images.unsplash.com/photo-1526738549149-8e07eca6c147?w=200&auto=format&fit=crop&q=80'}
-                    alt={item.productName}
+                    alt={item.productName || item.name || 'Product'}
                     style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}
                   />
 
@@ -121,7 +131,7 @@ export const CartPage = ({ onNavigate }) => {
                       style={{ fontSize: '0.95rem', fontWeight: 600, cursor: 'pointer' }}
                       onClick={() => onNavigate(`/products/${item.productId}`)}
                     >
-                      {item.productName}
+                      {item.productName || item.name}
                     </h4>
                     <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
                       Price: ${item.price.toFixed(2)} each
@@ -148,7 +158,7 @@ export const CartPage = ({ onNavigate }) => {
                     </span>
                     <button
                       style={{ width: 28, height: 32, background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}
-                      disabled={item.quantity >= item.stockQuantity || updatingId === item.productId}
+                      disabled={item.quantity >= maxStock || updatingId === item.productId}
                       onClick={() => handleQtyChange(item.productId, item.quantity + 1)}
                     >
                       +
