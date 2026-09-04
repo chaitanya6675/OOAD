@@ -12,6 +12,11 @@ const dbPath = process.env.DATABASE_PATH
   ? path.resolve(__dirname, '..', process.env.DATABASE_PATH)
   : path.join(dbDir, 'ecommerce.db');
 
+const resolvedDir = path.dirname(dbPath);
+if (!fs.existsSync(resolvedDir)) {
+  fs.mkdirSync(resolvedDir, { recursive: true });
+}
+
 // Initialize SQLite database instance
 const db = new Database(dbPath, {
   verbose: process.env.NODE_ENV === 'development' ? null : null
